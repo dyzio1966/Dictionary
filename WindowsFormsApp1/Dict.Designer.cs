@@ -37,6 +37,7 @@
             this.cbDirection = new System.Windows.Forms.ComboBox();
             this.pbFlag = new System.Windows.Forms.PictureBox();
             this.ilFlags = new System.Windows.Forms.ImageList(this.components);
+            this.lbWords_pl = new System.Windows.Forms.ListBox();
             ((System.ComponentModel.ISupportInitialize)(this.pbFlag)).BeginInit();
             this.SuspendLayout();
             // 
@@ -121,11 +122,28 @@
             this.ilFlags.Images.SetKeyName(0, "if_Flag_of_United_Kingdom_96354.png");
             this.ilFlags.Images.SetKeyName(1, "if_Flag_of_Poland_96372.png");
             // 
+            // lbWords_pl
+            // 
+            this.lbWords_pl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lbWords_pl.DisplayMember = "text";
+            this.lbWords_pl.FormattingEnabled = true;
+            this.lbWords_pl.Location = new System.Drawing.Point(13, 67);
+            this.lbWords_pl.Name = "lbWords_pl";
+            this.lbWords_pl.ScrollAlwaysVisible = true;
+            this.lbWords_pl.Size = new System.Drawing.Size(187, 251);
+            this.lbWords_pl.TabIndex = 7;
+            this.lbWords_pl.ValueMember = "id";
+            this.lbWords_pl.Visible = false;
+            this.lbWords_pl.SelectedIndexChanged += new System.EventHandler(this.lbWords_pl_SelectedIndexChanged);
+            // 
             // Dict
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(658, 326);
+            this.Controls.Add(this.lbWords_pl);
             this.Controls.Add(this.pbFlag);
             this.Controls.Add(this.cbDirection);
             this.Controls.Add(this.txInput);
@@ -154,6 +172,7 @@
         private System.Windows.Forms.ComboBox cbDirection;
         private System.Windows.Forms.PictureBox pbFlag;
         private System.Windows.Forms.ImageList ilFlags;
+        private System.Windows.Forms.ListBox lbWords_pl;
     }
 }
 

@@ -31,7 +31,8 @@ namespace CollinsDict
 
         // Holds our connection with the database
         SQLiteConnection m_dbConnection;
-        List<Word> m_words;
+        bool m_isInited = false;
+        List<Word>[] m_words = new List<Word>[2];
         bool m_isPl = false;
         bool m_changing = false;
         bool m_isInSearch = false;
@@ -43,6 +44,14 @@ namespace CollinsDict
             InitializeComponent();
         }
 
+        private ListBox getLB() {
+            if (m_isPl) {
+                return lbWords_pl;
+            } else {
+                return lbWords;
+            }
+        }
+
         private void btnExit_Click(object sender, EventArgs e)
         {
             Application.Exit();
@@ -50,20 +59,32 @@ namespace CollinsDict
 
         private void fillWordsList()
         {
-            string sql = "select * from word{0} order by id";
-            sql = String.Format(sql, m_isPl ? "_pl" : "");
-            SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
+            if (!m_isInited) {
+                for (int i = 0; i < 2; i++) {
+                    string sql = "select * from word{0} order by id";
+                    sql = String.Format(sql, i == 1 ? "_pl" : "");
+                    SQLiteCommand command = new SQLiteCommand(sql, m_dbConnection);
 
-            SQLiteDataReader reader = command.ExecuteReader();
+                    SQLiteDataReader reader = command.ExecuteReader();
 
-            m_words = new List<Word>();
-            while (reader.Read())
-            {
-                m_words.Add(new Word((string)reader["text"], (long)reader["id"]));
+                    m_words[i] = new List<Word>();
+                    while (reader.Read()) {
+                        m_words[i].Add(new Word((string)reader["text"], (long)reader["id"]));
+                    }
+                    if (i == 0) {
+                        lbWords.DataSource = m_words[0];
+                        lbWords.DisplayMember = "text";
+                        lbWords.ValueMember = "id";
+                    } else {
+                        lbWords_pl.DataSource = m_words[1];
+                        lbWords_pl.DisplayMember = "text";
+                        lbWords_pl.ValueMember = "id";
+                    }
+                }
+                m_isInited = true;
             }
-            lbWords.DataSource = m_words;
-            lbWords.DisplayMember = "text";
-            lbWords.ValueMember = "id";
+            lbWords.Visible = !m_isPl;
+            lbWords_pl.Visible = m_isPl;
         }
 
         private void connectToDatabase()
@@ -100,6 +121,9 @@ namespace CollinsDict
             initPos();
             connectToDatabase();
             initState();
+            // we are switching to pl for a moment to force pl listbox to initiate properly to save time later
+            setPl();
+            setEng();
         }
 
         private void initPos()
@@ -159,6 +183,15 @@ namespace CollinsDict
             m_isInSelect = false;
         }
 
+        private void lbWords_pl_SelectedIndexChanged(object sender, EventArgs e) {
+            m_isInSelect = true;
+            fillEntry((long)lbWords_pl.SelectedValue);
+            if (!m_isInSearch) {
+                txInput.Text = lbWords_pl.Text;
+            }
+            m_isInSelect = false;
+        }
+
         private void txInput_TextChanged(object sender, EventArgs e)
         {
             if (m_isInSelect) return;
@@ -189,7 +222,7 @@ namespace CollinsDict
         private void MatchWord(string curVal)
         {
             var item =
-                lbWords.Items.Cast<Word>()
+                getLB().Items.Cast<Word>()
                     .FirstOrDefault(it => it.text.StartsWith(curVal, true, CultureInfo.InvariantCulture));
 
             if (item == null)
@@ -197,9 +230,9 @@ namespace CollinsDict
                 MatchWord(curVal.Remove(curVal.Length - 1));
                 return;
             }
-            var index = lbWords.Items.IndexOf(item);
+            var index = getLB().Items.IndexOf(item);
             if (index < 0) return;
-            lbWords.SelectedIndex = index;
+            getLB().SelectedIndex = index;
         }
 
         private void cbDirection_SelectedIndexChanged(object sender, EventArgs e)
@@ -255,9 +288,9 @@ namespace CollinsDict
                             Clipboard.SetText(txInput.SelectedText);
                             e.Handled = true;
                         }
-                        else if (this.ActiveControl.Name == "lbWords")
+                        else if (this.ActiveControl.Name == "lbWords" || this.ActiveControl.Name == "lbWords_pl")
                         {
-                            Clipboard.SetText(lbWords.Text);
+                            Clipboard.SetText(getLB().Text);
                             e.Handled = true;
                         }
                         else
